@@ -1,0 +1,9 @@
+---
+title: "01_SequenceCollection"
+output: html_document
+---
+
+```{bash}
+pwd
+```
+
