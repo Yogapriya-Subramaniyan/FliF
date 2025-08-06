@@ -1,0 +1,19 @@
+Incorrect number of command line arguments.
+Usage: esl-reformat [-options] <format> <seqfile>
+  Output format choices: Unaligned      Aligned    
+                         -----------    -------    
+                         fasta          a2m        
+                         hmmpgmd        afa        
+                                        clustal    
+                                        clustallike
+                                        pfam       
+                                        phylip     
+                                        phylips    
+                                        psiblast   
+                                        selex      
+                                        stockholm  
+
+
+
+To see more help on available options, do esl-reformat -h
+

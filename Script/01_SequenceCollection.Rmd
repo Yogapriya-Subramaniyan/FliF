@@ -1,0 +1,62 @@
+---
+title: "01_SequenceCollection"
+output: html_document
+---
+
+# protein_20250805.fasta -moved to local folder "/Semester3/Genome" - as it is large and cant be synched with Git
+
+```{bash}
+# Bash File for Downloading Genome
+chmod +x download_genomes.sh
+./download_genomes.sh
+
+# Concat all the protein fasta from 
+find GCF_* -name "*protein.faa" -execdir cat '{}' \; > 20250805newprots_allprots.fasta
+```
+# Search for homology using precalculated HMM profiles
+```{bash}
+# unzip all the hmm files
+find *.hmm.gz -execdir gunzip '{}' \;
+
+# Use hmm to find the distant homologs
+# FliF
+hmmsearch --cpu 4 -E 0.01 -o ./Data/Homologs_precalculated/FliF/hmm_results_FliF.txt --tblout ./Data/Homologs_precalculated/FliF/FliF_hits_table.txt --domtblout ./Data/Homologs_precalculated/FliF/domains_table.txt ./Data/Precalculated_HMM/YscJ_FliF.hmm ./Data/protein_20250805.fasta
+
+#FliF_C
+hmmsearch --cpu 4 -E 0.01 -o ./Data/Homologs_precalculated/FliF_C/hmm_results_FliF_C.txt --tblout ./Data/Homologs_precalculated/FliF_C/FliF_C_hits_table.txt --domtblout ./Data/Homologs_precalculated/FliF_C/domains_table.txt ./Data/Precalculated_HMM/YscJ_FliF_C.hmm ./Data/protein_20250805.fasta
+
+#FlhB
+hmmsearch --cpu 4 -E 0.01 -o ./Data/Homologs_precalculated/FlhB_SpaS/hmm_results_FlhB_SpaS.txt --tblout ./Data/Homologs_precalculated/FlhB_SpaS/FlhB_SpaS_hits_table.txt --domtblout ./Data/Homologs_precalculated/FlhB_SpaS/domains_table.txt ./Data/Precalculated_HMM/FlhB_SpaS_HrpN_YscU.hmm ./Data/protein_20250805.fasta
+
+#SpoIIIAH
+hmmsearch --cpu 4 -E 0.01 -o ./Data/Homologs_precalculated/SpoIIIAH/hmm_results_SpoIIIAH.txt --tblout ./Data/Homologs_precalculated/SpoIIIAH/SpoIIIAH_hits_table.txt --domtblout ./Data/Homologs_precalculated/SpoIIIAH/domains_table.txt ./Data/Precalculated_HMM/SpoIIIAH.hmm ./Data/protein_20250805.fasta
+```
+
+# Extract fasta file based on HMM hits
+```{bash}
+./Data/Homologs_precalculated/FliF/FliF_hits_table.txt
+# FliF
+grep -v '^#' ./Data/Homologs_precalculated/FliF/FliF_hits_table.txt | awk '{print $1}' | sort -u > ./Data/Homologs_precalculated/FliF/FliF_hit_ids.txt
+seqkit grep -f ./Data/Homologs_precalculated/FliF/FliF_hit_ids.txt ./Data/protein_20250805.fasta > ./Data/Homologs_precalculated/FliF/FliF_matched_hits.fasta
+
+# FliF_C
+grep -v '^#' ./Data/Homologs_precalculated/FliF_C/FliF_C_hits_table.txt | awk '{print $1}' | sort -u > ./Data/Homologs_precalculated/FliF_C/FliF_C_hit_ids.txt
+seqkit grep -f ./Data/Homologs_precalculated/FliF_C/FliF_C_hit_ids.txt ./Data/protein_20250805.fasta > ./Data/Homologs_precalculated/FliF_C/FliF_C_matched_hits.fasta
+
+# SpoIIIAH
+grep -v '^#' ./Data/Homologs_precalculated/SpoIIIAH/SpoIIIAH_hits_table.txt | awk '{print $1}' | sort -u > ./Data/Homologs_precalculated/SpoIIIAH/SpoIIIAH_hit_ids.txt
+seqkit grep -f ./Data/Homologs_precalculated/SpoIIIAH/SpoIIIAH_hit_ids.txt ./Data/protein_20250805.fasta > ./Data/Homologs_precalculated/SpoIIIAH/SpoIIIAH_matched_hits.fasta
+
+# FlhB
+grep -v '^#' ./Data/Homologs_precalculated/FlhB_SpaS/FlhB_SpaS_hits_table.txt | awk '{print $1}' | sort -u > ./Data/Homologs_precalculated/FlhB_SpaS/FlhB_SpaS_hit_ids.txt
+seqkit grep -f ./Data/Homologs_precalculated/FlhB_SpaS/FlhB_SpaS_hit_ids.txt ./Data/protein_20250805.fasta > ./Data/Homologs_precalculated/FlhB_SpaS/FlhB_SpaS_matched_hits.fasta
+
+## Concat all fasta files
+cat ./Data/Homologs_precalculated/FliF/FliF_matched_hits.fasta ./Data/Homologs_precalculated/FliF_C/FliF_C_matched_hits.fasta ./Data/Homologs_precalculated/SpoIIIAH/SpoIIIAH_matched_hits.fasta ./Data/Homologs_precalculated/FlhB_SpaS/FlhB_SpaS_matched_hits.fasta > ./Data/Homologs_precalculated/homologs.fasta
+```
+
+# Precalculated_Homologs_Analysis
+```{bash}
+setwd("Users/Yoga/Library/CloudStorage/OneDrive-Personal/PG Materials/Semester3/FliF")
+```
+

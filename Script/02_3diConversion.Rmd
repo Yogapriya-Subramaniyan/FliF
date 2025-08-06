@@ -1,0 +1,117 @@
+---
+title: "02_3diConversion"
+output: html_document
+---
+
+# Libraries
+```{r}
+library(ape)
+library(msa)
+library(seqinr)
+library(BioGeoBEARS)
+library(rvest) # for html_table()
+library(phytools) # for midpoint.root
+library(openxlsx) # for read.xlsx
+```
+
+# Sourcing
+```{r}
+sourceall("~/GitHub/str2phy/Rsrc/")
+source("~/GitHub/str2phy/Rsrc/protein_bioinf_v1.R")
+source("~/GitHub/str2phy/Rsrc/str2phy_v1.R")
+sourceall("~/GitHub/str2phy/Rsrc/")
+```
+
+# Assigning the unaligned amino acid sequences to 'fasta_fn'
+```{r}
+setwd("~/Library/CloudStorage/OneDrive-Personal/PG Materials/Semester3/FliF/Data/Homologs_pre_analysis")
+fasta_fn = "aa_unaligned.fasta"
+tmpseqs = ape::read.FASTA(fasta_fn, type="AA")
+numseqs = length(tmpseqs)
+numseqs
+```
+# Running Chimera to get 3D structure of all amino acids from alphafold using Chimera
+
+Alphafold returns cif file for each proteins Returns 3 files - \_alphafold.cif, \_alphafold.html, \_alphafold_table.html and txt file (defined in 'outdfs_fn')
+```{r}
+setwd("~/Library/CloudStorage/OneDrive-Personal/PG Materials/Semester3/FliF/Data/Homologs_pre_analysis")
+outdfs = NULL; i=1
+
+exclude_is = c()
+for (i in 1:numseqs)
+	{
+	txt = paste0("Getting alphafold structure for sequence #", i, "/", numseqs)
+	cat("\n")
+	cat(txt)
+	cat("\n")
+	
+	if ((i %in% exclude_is) == TRUE)
+		{
+		seqs = ape::read.FASTA(fasta_fn, type="AA")
+		header = names(seqs)[[i]]
+		gid = firstword(header)
+		
+		txt = paste0("Sequence #", i, "/", numseqs, ", aka '", gid, "', skipped as it is known to cause a problem.")
+		cat("\n")
+		cat(txt)
+		cat("\n")
+		outdf = rep(NA, times=13)
+		names(outdf) = c("seqnum", "AlphaFold Model", "Query Sequence", "Identity %", "Coverage %", "cif_fn", "html_fn", "table_fn", "dump_fn", "chain_names_fn", "di3_fn", "aa_fn", "both_fn")
+		outdfs = rbind(outdfs, outdf)
+		next()
+		} # END if (i %in% exclude_is)
+	
+	# Just get the CIF files
+	outdf = fasta_to_alphafold_cifs(fasta_fn=fasta_fn, seqnum=i)
+	print(outdf[1:5])
+	outdfs = rbind(outdfs, outdf)
+	
+	outdfs_fn = "alphafolds.txt"
+	write.table(x=outdfs, file=outdfs_fn, quote=FALSE, sep="\t", row.names=FALSE, col.names=TRUE)
+	} # END for (i in 1:numseqs)
+```
+
+
+```{r}
+# Extract the information from the HTML tables
+setwd("~/Library/CloudStorage/OneDrive-Personal/PG Materials/Semester3/FliF/Data/Homologs_pre_analysis")
+source("~/GitHub/str2phy/Rsrc/str2phy_v1.R")
+fns = list.files(path=".", pattern=".html")
+TF = grepl(pattern="_table.html", x=fns)
+html_fns = fns[TF==FALSE]
+table_fns = fns[TF==TRUE]
+cbind(html_fns, table_fns)
+
+outdfs = alphafold_htmls_to_df(html_fns, table_fns)
+
+
+# Convert the structures to 3di, return table
+source("~/GitHub/str2phy/Rsrc/str2phy_v1.R")
+structure_fns = list.files(path=".", pattern=".cif")
+fns_df = structures_to_3dis(structure_fn=structure_fns, suffix=".cif")
+fns_df
+
+
+# Merge
+seqnum = 1:nrow(fns_df)
+outdfs2 = cbind(seqnum, outdfs, fns_df)
+outdfs2
+outdfs_fn = "alphafolds2.txt"
+write.table(x=outdfs2, file=outdfs_fn, quote=FALSE, sep="\t", row.names=FALSE, col.names=TRUE)
+
+outdfs2_fn = "alphafolds2.txt"
+outdfs = read.table(outdfs2_fn, quote="", sep="\t", header=TRUE, skip=0)
+outdfs
+names_outdfs = c("seqnum", "AlphaFold Model", "Query Sequence", "Identity %", "Coverage %", "cif_fn", "html_fn", "table_fn", "dump_fn", "chain_names_fn", "di3_fn", "aa_fn", "both_fn")
+#names(outdfs) = names_outdfs
+#outdfs
+```
+
+# Concatenate all _3di.fasta files into a big one
+```{bash}
+cat *_alphafold_3di.fasta > 3di_unaligned.fasta
+```
+
+# Concatenate all aa.fasta files into a big one
+```{bash}
+cat *_alphafold_aa.fasta > AA_fromStructs_unaligned.fasta
