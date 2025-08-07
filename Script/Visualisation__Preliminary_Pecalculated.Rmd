@@ -1,0 +1,30 @@
+---
+title: "Visualisation__Preliminary_Pecalculated"
+output: html_document
+---
+## Loading libraries
+```{r}
+library(ape)
+library(phytools)
+
+```
+
+## Clustal_Nj
+```{r}
+clustal_tree <- read.tree("Data/02_Homologs_precalculated/aliView_duplicate_removed/Clustalo_Nj/outTree_midpointRooted.nwk")
+pdf("Data/02_Homologs_precalculated/aliView_duplicate_removed/Clustalo_Nj/Tree.pdf", width = 8, height = 8)
+plot(clustal_tree,  label., edge.width = 0.05, label.offset = 3)
+dev.off()
+
+```
+
+## Mafft_Nj
+```{r}
+
+```
+
+## Muscle_Nj
+```{r}
+
+```
+

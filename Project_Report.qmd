@@ -1,0 +1,23 @@
+---
+title: "Project_Report"
+format: html
+---
+
+## Introduction
+
+## Research Question
+
+1.  Where is the root of FliF located
+2.  Where are the outgroups (non-flagellar T3SS) occur with respect to the root
+3.  Is it similar to MotAB – Motor proteins -
+
+## Methods
+
+### Collection of sequences
+
+1.  Collect all protein sequences as fasta from various genomes script
+
+### Homolog protein Identification
+
+2.  Using precalculated profiles of FliF, use JackHMMER (Hidden Markov Model) to find the distant relatives
+3.  Or use Jackhmmer to build a profile (from various starting points) Pfam (Protein Family)– provides precalculated profiles PSSM(Point Specific Scoring matrix) – a statistical of protein family

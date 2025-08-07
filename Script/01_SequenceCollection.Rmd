@@ -55,8 +55,20 @@ seqkit grep -f ./Data/Homologs_precalculated/FlhB_SpaS/FlhB_SpaS_hit_ids.txt ./D
 cat ./Data/Homologs_precalculated/FliF/FliF_matched_hits.fasta ./Data/Homologs_precalculated/FliF_C/FliF_C_matched_hits.fasta ./Data/Homologs_precalculated/SpoIIIAH/SpoIIIAH_matched_hits.fasta ./Data/Homologs_precalculated/FlhB_SpaS/FlhB_SpaS_matched_hits.fasta > ./Data/Homologs_precalculated/homologs.fasta
 ```
 
-# Precalculated_Homologs_Analysis
+# Preliminary Analysis
 ```{bash}
-setwd("Users/Yoga/Library/CloudStorage/OneDrive-Personal/PG Materials/Semester3/FliF")
+## Removing duplicate sequences
+seqkit rmdup -s < homologs.fasta > homologs_duplicate_removed_seqkit.fasta
 ```
+
+# HMM Building and analysis
+```{bash}
+mafft --maxiterate 1000 --localpair SpoIIIAG.fasta | esl-reformat stockholm > /Users/Yoga/Library/CloudStorage/OneDrive-Personal/PG\ Materials/Semester3/FliF/Data/Homologs_analysis/SpoIIIAG_aligned.sto
+
+```
+
+```{bash}
+famsa
+```
+
 
