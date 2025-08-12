@@ -21,13 +21,11 @@ names(fasta_file) <- sapply(names(fasta_file), function(name) {
   fasta_ids <- strsplit(name, split = "\\.")[[1]][1]
    for (j in 1:length(newnames)){
     newnames_accession <- strsplit(newnames[j], split = "\\.")[[1]][1]
-    print(paste0(j,fasta_ids,newnames_accession))
     if (fasta_ids == newnames_accession) {
       return(newnames[j])
    }
    }
 })
-print(names(fasta_file))
 write.fasta(sequences = fasta_file, names=names(fasta_file), file.out = "") ## Give the output fasta file name
 ```
 
@@ -41,13 +39,11 @@ names(fasta_file) <- sapply(names(fasta_file), function(name) {
   fasta_ids <- strsplit(name, split = "\\.")[[1]][1]
    for (j in 1:length(newnames)){
     newnames_accession <- strsplit(newnames[j], split = "\\.")[[1]][1]
-    print(paste0(j,fasta_ids,newnames_accession))
     if (fasta_ids == newnames_accession) {
       return(newnames[j])
    }
    }
 })
-print(names(fasta_file))
 write.fasta(sequences = fasta_file, names=names(fasta_file), file.out = "") ## Give the output renmaed fasta file name
 
 ```

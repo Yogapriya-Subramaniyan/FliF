@@ -16,21 +16,13 @@ library(phytools)
 
 ```
 
-## Clustal_Nj
-```{r}
-clustal_tree <- read.tree("Data/02_Homologs_precalculated/Seqkit_duplicate_removed/Clustal_Nj/outTree_midpointRooted_renamed.nwk")
-pdf("Data/02_Homologs_precalculated/Seqkit_duplicate_removed/Clustal_Nj/Tree.pdf", width = 8, height = 8)
-plot(clustal_tree, edge.width = 0.05, label.offset = 3, cex = 0.0005)
-dev.off()
-
-```
 
 ## Renaming Homolog file with accession number
 ```{r}
 getwd()
-xlsfn = "Data/02_Homologs_precalculated/Homologs_Renamed_Seqkit.xlsx"
+xlsfn = "Data/03_Homologs_Jackhmmer/Homologs_renamed.xlsx"
 xls = openxlsx::read.xlsx(xlsxFile=xlsfn, sheet=1, startRow=1, colNames=TRUE)
-fasta_file <- read.fasta (file = "Data/02_Homologs_precalculated/homologs_duplicate_removed_seqkit.fasta")
+fasta_file <- read.fasta (file = "Data/03_Homologs_Jackhmmer/homologs_duplicate_removed_seqkit.fasta")
 newnames = as.array(xls$protein)
 names(fasta_file) <- sapply(names(fasta_file), function(name) {
   fasta_ids <- strsplit(name, split = "\\.")[[1]][1]
@@ -41,14 +33,14 @@ names(fasta_file) <- sapply(names(fasta_file), function(name) {
    }
    }
 })
-write.fasta(sequences = fasta_file, names=names(fasta_file), file.out = "Data/02_Homologs_precalculated/homologs_duplicate_removed_seqkit_renamed.fasta")
+write.fasta(sequences = fasta_file, names=names(fasta_file), file.out = "Data/03_Homologs_Jackhmmer/homologs_duplicate_removed_seqkit_renamed.fasta")
 ```
 
 ## Renaming Aligned File with Accession number Clustal_Nj
 ```{r}
-xlsfn = "Data/02_Homologs_precalculated/Homologs_Renamed_Seqkit.xlsx"
+xlsfn = "Data/03_Homologs_Jackhmmer/Homologs_renamed.xlsx"
 xls = openxlsx::read.xlsx(xlsxFile=xlsfn, sheet=1, startRow=1, colNames=TRUE)
-fasta_file <- read.fasta (file = "Data/02_Homologs_precalculated/Seqkit_duplicate_removed/Clustal_Nj/input.fa.final_tree.used_alg.fa")
+fasta_file <- read.fasta (file = "Data/03_Homologs_Jackhmmer/Seqkit_duplicate_removed/Clustal_Nj/input.fa.final_tree.used_alg.fa")
 newnames = as.array(xls$protein)
 names(fasta_file) <- sapply(names(fasta_file), function(name) {
   fasta_ids <- strsplit(name, split = "\\.")[[1]][1]
@@ -59,7 +51,7 @@ names(fasta_file) <- sapply(names(fasta_file), function(name) {
    }
    }
 })
-write.fasta(sequences = fasta_file, names=names(fasta_file), file.out = "Data/02_Homologs_precalculated/Seqkit_duplicate_removed/Clustal_Nj/input.fa.final_tree.used_alg_renamned.fa")
+write.fasta(sequences = fasta_file, names=names(fasta_file), file.out = "Data/03_Homologs_Jackhmmer/Seqkit_duplicate_removed/Clustal_Nj/input.fa.final_tree.used_alg_renamned.fa")
 
 ```
 
@@ -68,27 +60,36 @@ write.fasta(sequences = fasta_file, names=names(fasta_file), file.out = "Data/02
 source("~/GitHub/str2phy/Rsrc/seqnames_v1.R")
 library(tidyverse)
 
-tree_fn = "Data/02_Homologs_precalculated/Seqkit_duplicate_removed/Clustal_Nj/outTree_midpointRooted.nwk"
+tree_fn = "Data/03_Homologs_Jackhmmer/Seqkit_duplicate_removed/Clustal_Nj/outTree_midpointRooted.nwk"
 tr = ape::read.tree(tree_fn)
-xlsfn = "Data/02_Homologs_precalculated/Homologs_Renamed_Seqkit.xlsx"
+xlsfn = "Data/03_Homologs_Jackhmmer/Homologs_renamed.xlsx"
 xls = openxlsx::read.xlsx(xlsxFile=xlsfn, sheet=1, startRow=1, colNames=TRUE)
 
 tipnames <- substr(tr$tip.label, 1, (regexpr("\\.", tr$tip.label)+1))
 tr$tip.label = tipnames
 gidskey = xls$AccessionNumber
 newmatch = fixnames(xls$protein)
-tr_renamed = fix_tipnames_gid(gids=gidskey, newmatch=ZorB_names, tr=tr)
-write.tree(tr_renamed, "Data/02_Homologs_precalculated/Seqkit_duplicate_removed/Clustal_Nj/outTree_midpointRooted_renamed.nwk")
+tr_renamed = fix_tipnames_gid(gids=gidskey, newmatch=newmatch, tr=tr)
+write.tree(tr_renamed, "Data/03_Homologs_Jackhmmer/Seqkit_duplicate_removed/Clustal_Nj/outTree_midpointRooted_renamed.nwk")
 ```
 
 # Reordering Alignment File based on tree
 ```{r}
-tr_renamed <- ape::read.tree("Data/02_Homologs_precalculated/Seqkit_duplicate_removed/Clustal_Nj/outTree_midpointRooted_renamed.nwk")
+tr_renamed <- ape::read.tree("Data/03_Homologs_Jackhmmer/Seqkit_duplicate_removed/Clustal_Nj/outTree_midpointRooted_renamed.nwk")
 desired_order <- tr_renamed$tip.label[order(-(get("last_plot.phylo", envir = .PlotPhyloEnv)$yy[1:Ntip(tr_renamed)]))]
-fasta_file <- read.fasta (file = "Data/02_Homologs_precalculated/Seqkit_duplicate_removed/Clustal_Nj/input.fa.final_tree.used_alg_renamned.fa")
+fasta_file <- read.fasta (file = "Data/03_Homologs_Jackhmmer/Seqkit_duplicate_removed/Clustal_Nj/input.fa.final_tree.used_alg_renamned.fa")
 fasta_ids <-names(fasta_file)
 tip_ids <- desired_order
 reordered_fasta <- fasta_file[(match(tip_ids, fasta_ids))]
-write.fasta(sequences = reordered_fasta, names=desired_order, file.out = "Data/02_Homologs_precalculated/Seqkit_duplicate_removed/Clustal_Nj/input.fa.final_tree.used_alg_renamned_reordered.fa")
+write.fasta(sequences = reordered_fasta, names=desired_order, file.out = "Data/03_Homologs_Jackhmmer/Seqkit_duplicate_removed/Clustal_Nj/input.fa.final_tree.used_alg_renamned_reordered.fa")
 ```
 
+
+## Clustal_Nj
+```{r}
+clustal_tree <- read.tree("Data/03_Homologs_Jackhmmer/Seqkit_duplicate_removed/Clustal_Nj/outTree_midpointRooted_renamed.nwk")
+pdf("Data/03_Homologs_Jackhmmer/Seqkit_duplicate_removed/Clustal_Nj/Tree.pdf", width = 8, height = 8)
+plot(clustal_tree, edge.width = 0.05, label.offset = 3, cex = 0.05)
+dev.off()
+
+```
