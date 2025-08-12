@@ -2,7 +2,7 @@
 title: "01_SequenceCollection"
 output: html_document
 ---
-
+# /Users/Yoga/Library/CloudStorage/Dropbox/flag/Full_genomes/Spo_Genomes/protein_20250805.fasta. is the file used for Homolog searches
 # protein_20250805.fasta -moved to local folder "/Semester3/Genome" - as it is large and cant be synched with Git
 
 ```{bash}
@@ -63,12 +63,31 @@ seqkit rmdup -s < homologs.fasta > homologs_duplicate_removed_seqkit.fasta
 
 # HMM Building and analysis
 ```{bash}
-mafft --maxiterate 1000 --localpair SpoIIIAG.fasta | esl-reformat stockholm > /Users/Yoga/Library/CloudStorage/OneDrive-Personal/PG\ Materials/Semester3/FliF/Data/Homologs_analysis/SpoIIIAG_aligned.sto
+# Copying start sequence fasta
+fasta.sh 
+
+# Building sto (using esl-reformat) from aligned fasta (using Mafft)
+fasta2sto.sh
+
+## Conversion of sto to hmm prolfile
+sto2hmm.sh (hmmbuild aligned.hmm aligned.sto)
+
+## hmmsearch using the profiles
+
+hmm2fasta.sh (hmmsearch fron /Users/Yoga/Library/CloudStorage/Dropbox/flag/Full_genomes/Spo_Genomes/protein_20250805.fasta)
+
+## Extract fasta file based on HMM hits
+hmm2homologs.sh
+
+## Concating fasta files
+concat_homologs.sh
+
+## duplicate removal using seqkit 
 
 ```
 
 ```{bash}
-famsa
+seqkit rmdup -s < homologs.fasta > homologs_duplicate_removed_seqkit.fasta
 ```
 
 

@@ -1,0 +1,9 @@
+= IFS(ISNUMBER(FIND("FliF",C3)), "FliF",
+ISNUMBER(FIND("M-ring",C3)), "FliF",
+ISNUMBER(FIND("M-Ring",C3)), "FliF",
+ISNUMBER(FIND("fliF",C3)), "FliF",
+ISNUMBER(FIND("MS-ring",C3)), "FliF", 
+ISNUMBER(FIND("SpoIIIAH",C3)), "SpoIIIAH", 
+ISNUMBER(FIND("FlhB",C3)), "FlhB", 
+ISNUMBER(FIND("ATPase",C3)), "ATPase",
+ISNUMBER(FIND("ATPase",C3)), "ATPase",)

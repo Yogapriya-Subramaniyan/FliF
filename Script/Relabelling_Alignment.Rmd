@@ -3,3 +3,80 @@ title: "Relabelling_Alignment"
 output: html_document
 ---
 
+The following codes run in the assumption that in both the fasta file and tree file, the acession number has a dot(.) and followed by a "_"
+
+## Libraries
+```{r}
+
+```
+
+## Renaming Homolog file with accession number
+```{r}
+
+xlsfn = "" ## excel file with accession Number and desirable name
+xls = openxlsx::read.xlsx(xlsxFile=xlsfn, sheet=1, startRow=1, colNames=TRUE)
+fasta_file <- read.fasta (file = "") ## Fasta file to be renamed
+newnames = as.array(xls$protein)
+names(fasta_file) <- sapply(names(fasta_file), function(name) {
+  fasta_ids <- strsplit(name, split = "\\.")[[1]][1]
+   for (j in 1:length(newnames)){
+    newnames_accession <- strsplit(newnames[j], split = "\\.")[[1]][1]
+    print(paste0(j,fasta_ids,newnames_accession))
+    if (fasta_ids == newnames_accession) {
+      return(newnames[j])
+   }
+   }
+})
+print(names(fasta_file))
+write.fasta(sequences = fasta_file, names=names(fasta_file), file.out = "") ## Give the output fasta file name
+```
+
+## Renaming Aligned File with Accession number Clustal_Nj
+```{r}
+xlsfn = "" ## excel file with accession Number and desirable name
+xls = openxlsx::read.xlsx(xlsxFile=xlsfn, sheet=1, startRow=1, colNames=TRUE)
+fasta_file <- read.fasta (file = "") ## aligned fasta file to be renamed
+newnames = as.array(xls$protein)
+names(fasta_file) <- sapply(names(fasta_file), function(name) {
+  fasta_ids <- strsplit(name, split = "\\.")[[1]][1]
+   for (j in 1:length(newnames)){
+    newnames_accession <- strsplit(newnames[j], split = "\\.")[[1]][1]
+    print(paste0(j,fasta_ids,newnames_accession))
+    if (fasta_ids == newnames_accession) {
+      return(newnames[j])
+   }
+   }
+})
+print(names(fasta_file))
+write.fasta(sequences = fasta_file, names=names(fasta_file), file.out = "") ## Give the output renmaed fasta file name
+
+```
+
+## Renaming tree file
+```{r}
+source("~/GitHub/str2phy/Rsrc/seqnames_v1.R")
+library(tidyverse)
+
+tree_fn = "" ## tree to be renamed
+tr = ape::read.tree(tree_fn)
+xlsfn = "" ## excel file with accession Number(colname: AccessionNumber) and desirable name (colname: protein)
+xls = openxlsx::read.xlsx(xlsxFile=xlsfn, sheet=1, startRow=1, colNames=TRUE)
+
+tipnames <- substr(tr$tip.label, 1, (regexpr("\\.", tr$tip.label)+1))
+tr$tip.label = tipnames
+gidskey = xls$AccessionNumber
+newmatch = fixnames(xls$protein)
+tr_renamed = fix_tipnames_gid(gids=gidskey, newmatch=ZorB_names, tr=tr)
+write.tree(tr_renamed, "") ## output  - renamed free file
+```
+
+# Reordering Alignment File based on tree
+```{r}
+tr_renamed <- ape::read.tree("") ## renamed tree file
+desired_order <- tr_renamed$tip.label[order(-(get("last_plot.phylo", envir = .PlotPhyloEnv)$yy[1:Ntip(tr_renamed)]))]
+fasta_file <- read.fasta (file = "") ## renamed fasta file
+fasta_ids <-names(fasta_file)
+tip_ids <- desired_order
+reordered_fasta <- fasta_file[(match(tip_ids, fasta_ids))]
+write.fasta(sequences = reordered_fasta, names=desired_order, file.out = "") ## out file  - renamed, reordered fasta file
+```
