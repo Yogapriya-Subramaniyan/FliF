@@ -65,12 +65,18 @@ tr = ape::read.tree(tree_fn)
 xlsfn = "Data/03_Homologs_Jackhmmer/Homologs_renamed.xlsx"
 xls = openxlsx::read.xlsx(xlsxFile=xlsfn, sheet=1, startRow=1, colNames=TRUE)
 
-tipnames <- substr(tr$tip.label, 1, (regexpr("\\.", tr$tip.label)+1))
+tipnames <- ifelse(
+  grepl("\\.", tr$tip.label),
+  substr(tr$tip.label, 1, (regexpr("\\.", tr$tip.label)+1)),
+  tr$tip.label
+)
+
 tr$tip.label = tipnames
 gidskey = xls$AccessionNumber
 newmatch = fixnames(xls$protein)
 tr_renamed = fix_tipnames_gid(gids=gidskey, newmatch=newmatch, tr=tr)
-write.tree(tr_renamed, "Data/03_Homologs_Jackhmmer/Seqkit_duplicate_removed/Clustal_Nj/outTree_midpointRooted_renamed.nwk")
+
+ape::write.tree(tr_renamed, "Data/03_Homologs_Jackhmmer/Seqkit_duplicate_removed/Clustal_Nj/outTree_midpointRooted_renamed.nwk")
 ```
 
 # Reordering Alignment File based on tree
@@ -93,3 +99,44 @@ plot(clustal_tree, edge.width = 0.05, label.offset = 3, cex = 0.05)
 dev.off()
 
 ```
+### To identify the issues in fig tree  - nodes cannot be empty error
+```{r}
+library(ape)
+
+# Read the tree
+tree_fn <- "Data/03_Homologs_Jackhmmer/Seqkit_duplicate_removed/Clustal_Nj/outTree_midpointRooted_renamed.nwk"
+tr <- ape::read.tree(tree_fn)
+
+# Inspect tip labels
+tip_labels <- tr$tip.label
+cat("First 10 tip labels:\n")
+print(head(tip_labels, 10))
+
+# Inspect internal node labels
+node_labels <- tr$node.label
+cat("First 10 internal node labels:\n")
+print(head(node_labels, 10))
+
+# Check for empty tip labels
+empty_tips <- tip_labels[tip_labels == "" | is.na(tip_labels)]
+cat("Empty tip labels:\n")
+print(empty_tips)
+
+# Check for empty node labels
+empty_nodes <- node_labels[node_labels == "" | is.na(node_labels)]
+cat("Empty internal node labels:\n")
+print(empty_nodes)
+
+# Check for duplicate tips
+dup_tips <- tip_labels[duplicated(tip_labels)]
+cat("Duplicate tip labels:\n")
+print(dup_tips)
+
+# Check for illegal characters in tip labels
+illegal_chars <- grep("[:()\\[\\],; ]", tip_labels, value = TRUE)
+cat("Tip labels with illegal characters:\n")
+print(illegal_chars)
+
+```
+
+

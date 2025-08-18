@@ -1,0 +1,40 @@
+---
+title: "Long_branch_removal"
+output: html_document
+---
+
+```{r}
+
+library(Biostrings)
+library(openxlsx)
+```
+
+```{r}
+fasta <- readAAStringSet("Data/03_Homologs_Jackhmmer/homologs_duplicate_removed_seqkit_renamed.fasta")
+
+```
+
+```{r}
+# Example: remove sequences named "seq1" and "seq3"
+remove_names <- c("AUO18621.1", "WP_010166288.1", "ABY94748.1", "ADC48381.1", "WP_014824101.1","WP_076758937.1", "WP_151698803.1", "GAK40209.1", "WP_371830858.1", "WP_017380071.1, ACN13335.1", "BAS28432.1" )
+
+xlsfn = "Data/03_Homologs_Jackhmmer/Homologs_renamed.xlsx"
+xls = openxlsx::read.xlsx(xlsxFile=xlsfn, sheet=1, startRow=1, colNames=TRUE)
+accession_number = xls$AccessionNumber
+protein_name = fixnames(xls$protein)
+for (i in 1:length(remove_names))
+		{
+		TF = grepl(pattern=remove_names[i], x=accession_number)
+		tipnum = ((1:length(TF))[TF])
+		remove_names[i] = protein_name[i]
+
+		} # END for (i in 1:length(remove_names))
+	
+
+remove_names
+# Filter out unwanted sequences
+filtered_fasta <- fasta[!(names(fasta) %in% remove_names)]
+length(filtered_fasta)
+writeXStringSet(filtered_fasta, "Data/03_Homologs_Jackhmmer/homologs_duplicate_removed_seqkit_renamed_longbranchremoved.fasta")
+```
+
