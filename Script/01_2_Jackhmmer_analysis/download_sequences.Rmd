@@ -1,0 +1,76 @@
+---
+title: "download_sequences"
+output: html_document
+---
+```{r}
+library(BioGeoBEARS)
+library(seqinr)
+#install.packages("reutils")
+library(reutils)
+library(openxlsx)
+sourceall("~/GitHub/str2phy/Rsrc/")
+library(rentrez)
+
+entrez_email <- "s.yogapriya@outlook.com"
+
+```
+
+
+# If you already have sequence IDs:# More sequences:
+```{r}
+xlsfn = "Data/03_Homologs_Jackhmmer/Homologs_renamed.xlsx"
+xls = openxlsx::read.xlsx(xlsxFile=xlsfn, sheet=1, startRow=1, colNames=TRUE)
+
+seqids = as.list(xls$AccessionNumber)
+tmpfn = "Data/04_Jackhmmer_downloaded_sequence/homolog_sequences.fasta"
+
+chunk_size <- 100
+chunks <- split(seqids, ceiling(seq_along(seqids)/chunk_size))
+
+all_seqs <- ""
+
+for (chunk in chunks) {
+  query <- paste0(chunk, "[Accession]", collapse=" OR ")
+  search_res <- entrez_search(db="protein", term=query, use_history=TRUE)
+  seqs <- entrez_fetch(db="protein",
+                       web_history=search_res$web_history,
+                       rettype="fasta",
+                       retmode="text")
+  all_seqs <- paste0(all_seqs, seqs)
+  Sys.sleep(0.3) # be polite to NCBI servers
+}
+
+write(all_seqs, file=tmpfn)
+
+```
+
+## Tried these
+## entrez search, fetch, webhistory
+```{r}
+db = "protein"
+type = "AA"
+more_than_500seqs = TRUE
+entrez_search <- entrez_search(db = "protein", term = , use_history = 'y' )
+sequences <- entrez_fetch(db = "protein", id = seqids, web_history = "entrez_search",rettype = "fasta", retmode = "text")
+seqs_from_genbank = reutils::efetch(uid=seqids, db="protein", rettype="fasta", retmode="text", outfile=tmpfn)
+		# Write to a temporary file
+		write(reutils::content(seqs_from_genbank, "text"), file=tmpfn)
+# 1. Build query string for esearch
+# Join all accessions with OR
+query <- paste0(seqids, "[Accession]", collapse = " OR ")
+
+# 2. Search in protein database, store results on NCBI history server
+res <- esearch(query, db = "protein", usehistory = TRUE)
+
+# 3. Use efetch with the esearch result
+seqs <- efetch(res, rettype = "fasta", retmode = "text", db = "protein")
+
+# 4. Extract the text
+fasta_txt <- content(seqs, "text")
+
+# 5. Save to file
+write(fasta_txt, file = tmpfn)
+
+seqids[[1]]
+```
+

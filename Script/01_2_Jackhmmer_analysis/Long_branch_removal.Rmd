@@ -10,14 +10,14 @@ library(openxlsx)
 ```
 
 ```{r}
-fasta <- readAAStringSet("Data/03_Homologs_Jackhmmer/homologs_duplicate_removed_seqkit_renamed.fasta")
+
 
 ```
 
 ```{r}
 # Example: remove sequences named "seq1" and "seq3"
 remove_names <- c("AUO18621.1", "WP_010166288.1", "ABY94748.1", "ADC48381.1", "WP_014824101.1","WP_076758937.1", "WP_151698803.1", "GAK40209.1", "WP_371830858.1", "WP_017380071.1, ACN13335.1", "BAS28432.1" )
-
+fasta <- readAAStringSet("Data/03_Homologs_Jackhmmer/homologs_duplicate_removed_seqkit_renamed.fasta")
 xlsfn = "Data/03_Homologs_Jackhmmer/Homologs_renamed.xlsx"
 xls = openxlsx::read.xlsx(xlsxFile=xlsfn, sheet=1, startRow=1, colNames=TRUE)
 accession_number = xls$AccessionNumber
@@ -36,5 +36,96 @@ remove_names
 filtered_fasta <- fasta[!(names(fasta) %in% remove_names)]
 length(filtered_fasta)
 writeXStringSet(filtered_fasta, "Data/03_Homologs_Jackhmmer/homologs_duplicate_removed_seqkit_renamed_longbranchremoved.fasta")
+```
+
+## Round 2
+"BAD64817.1","MCQ4635889.1","WP_014824101.1","WP_151698803.1","WP_076758937.1","GAK40209.1","WP_371830858.1","EGO63624.1","WP_067209905.1","QJS20168.1","BAC62710.1","QEO41070.1","WP_158546477.1"
+```{r}
+remove_names <- c("AUO18621.1", "WP_010166288.1", "ABY94748.1", "ADC48381.1", "WP_014824101.1","WP_076758937.1", "WP_151698803.1", "GAK40209.1", "WP_371830858.1", "WP_017380071.1, ACN13335.1", "BAS28432.1", "BAD64817.1","MCQ4635889.1","WP_014824101.1","WP_151698803.1","WP_076758937.1","GAK40209.1","WP_371830858.1","EGO63624.1","WP_067209905.1","QJS20168.1","BAC62710.1","QEO41070.1","WP_158546477.1")
+fasta <- readAAStringSet("Data/03_Homologs_Jackhmmer/homologs_duplicate_removed_seqkit_renamed.fasta")
+xlsfn = "Data/03_Homologs_Jackhmmer/Homologs_renamed.xlsx"
+xls = openxlsx::read.xlsx(xlsxFile=xlsfn, sheet=1, startRow=1, colNames=TRUE)
+accession_number = xls$AccessionNumber
+protein_name = fixnames(xls$protein)
+for (i in 1:length(remove_names))
+		{
+		TF = grepl(pattern=remove_names[i], x=accession_number)
+		tipnum = ((1:length(TF))[TF])
+		remove_names[i] = protein_name[i]
+
+		} # END for (i in 1:length(remove_names))
+	
+
+remove_names
+# Filter out unwanted sequences
+filtered_fasta <- fasta[!(names(fasta) %in% remove_names)]
+length(filtered_fasta)
+writeXStringSet(filtered_fasta, "Data/03_Homologs_Jackhmmer/homologs_duplicate_removed_seqkit_renamed_longbranchremoved2.fasta")
+```
+
+```{r}
+
+tr_renamed <- ape::read.tree("Data/03_Homologs_Jackhmmer/Seqkit_duplicate_removed/Clustal_NJ_LongbranchRemoved/Clustal_Nj_Longbranchremoved_2/outTree_midpointRooted.nwk") ## renamed tree file
+plotTree(tr_renamed)
+desired_order <- tr_renamed$tip.label[order(-(get("last_plot.phylo", envir = .PlotPhyloEnv)$yy[1:Ntip(tr_renamed)]))]
+fasta_file <- read.fasta (file = "Data/03_Homologs_Jackhmmer/Seqkit_duplicate_removed/Clustal_NJ_LongbranchRemoved/Clustal_Nj_Longbranchremoved_2/input.fa.final_tree.trimmed.fa") ## renamed fasta file
+fasta_ids <-names(fasta_file)
+tip_ids <- desired_order
+reordered_fasta <- fasta_file[(match(tip_ids, fasta_ids))]
+write.fasta(sequences = reordered_fasta, names=desired_order, file.out = "Data/03_Homologs_Jackhmmer/Seqkit_duplicate_removed/Clustal_NJ_LongbranchRemoved/Clustal_Nj_Longbranchremoved_2/input.fa.final_tree.trimmed_reordered.fasta") ## out file  - renamed, reordered fasta file
+```
+
+## Renaming of downloaded sequences
+```{r}
+xlsfn = "Data/03_Homologs_Jackhmmer/Homologs_renamed.xlsx" ## excel file with accession Number and desirable name
+xls = openxlsx::read.xlsx(xlsxFile=xlsfn, sheet=1, startRow=1, colNames=TRUE)
+fasta_file <- read.fasta (file = "Data/04_Jackhmmer_downloaded_sequence/homolog_sequences.fasta") ## Fasta file to be renamed
+
+newnames = as.array(xls$protein)
+names(fasta_file) <- sapply(names(fasta_file), function(name) {
+  fasta_ids <- strsplit(name, split = "\\.")[[1]][1]
+   for (j in 1:length(newnames)){
+    newnames_accession <- strsplit(newnames[j], split = "\\.")[[1]][1]
+    if (fasta_ids == newnames_accession) {
+      return(newnames[j])
+   }
+   }
+})
+write.fasta(sequences = fasta_file, names=names(fasta_file), file.out = "Data/04_Jackhmmer_downloaded_sequence/homolog_sequences_renamed.fasta") ## Give the output fasta file name
+```
+
+## Long branch removal from downloaded sequences
+```{r}
+remove_names <- c("AUO18621.1", "WP_010166288.1", "ABY94748.1", "ADC48381.1", "WP_014824101.1","WP_076758937.1", "WP_151698803.1", "GAK40209.1", "WP_371830858.1", "WP_017380071.1, ACN13335.1", "BAS28432.1", "BAD64817.1","MCQ4635889.1","WP_014824101.1","WP_151698803.1","WP_076758937.1","GAK40209.1","WP_371830858.1","EGO63624.1","WP_067209905.1","QJS20168.1","BAC62710.1","QEO41070.1","WP_158546477.1")
+fasta <- readAAStringSet("Data/04_Jackhmmer_downloaded_sequence/homolog_sequences_renamed.fasta")
+xlsfn = "Data/03_Homologs_Jackhmmer/Homologs_renamed.xlsx"
+xls = openxlsx::read.xlsx(xlsxFile=xlsfn, sheet=1, startRow=1, colNames=TRUE)
+accession_number = xls$AccessionNumber
+protein_name = fixnames(xls$protein)
+for (i in 1:length(remove_names))
+		{
+		TF = grepl(pattern=remove_names[i], x=accession_number)
+		tipnum = ((1:length(TF))[TF])
+		remove_names[i] = protein_name[i]
+
+		} # END for (i in 1:length(remove_names))
+	
+
+remove_names
+# Filter out unwanted sequences
+filtered_fasta <- fasta[!(names(fasta) %in% remove_names)]
+length(filtered_fasta)
+writeXStringSet(filtered_fasta, "Data/04_Jackhmmer_downloaded_sequence/homolog_sequences_renamed_longbranchremoved.fasta")
+```
+
+```{r}
+tr_renamed <- ape::read.tree("Data/04_Jackhmmer_downloaded_sequence/Clustal_NJ_Longbranchremoved2/outTree_midpointRooted.nwk") ## renamed tree file
+plot(tr_renamed)
+desired_order <- tr_renamed$tip.label[order(-(get("last_plot.phylo", envir = .PlotPhyloEnv)$yy[1:Ntip(tr_renamed)]))]
+fasta_file <- read.fasta (file = "Data/04_Jackhmmer_downloaded_sequence/Clustal_NJ_Longbranchremoved2/input.fa.final_tree.trimmed.fa") ## renamed fasta file
+fasta_ids <-names(fasta_file)
+tip_ids <- desired_order
+reordered_fasta <- fasta_file[(match(tip_ids, fasta_ids))]
+write.fasta(sequences = reordered_fasta, names=desired_order, file.out = "Data/04_Jackhmmer_downloaded_sequence/Clustal_NJ_Longbranchremoved2/input.fa.final_tree.trimmed_reordered.fa") ## out file  - renamed, reordered fasta file
 ```
 

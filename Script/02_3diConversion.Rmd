@@ -22,22 +22,18 @@ source("~/GitHub/str2phy/Rsrc/str2phy_v1.R")
 sourceall("~/GitHub/str2phy/Rsrc/")
 ```
 
-# Assigning the unaligned amino acid sequences to 'fasta_fn'
-```{r}
-setwd("~/Library/CloudStorage/OneDrive-Personal/PG Materials/Semester3/FliF/Data/Homologs_pre_analysis")
-fasta_fn = "aa_unaligned.fasta"
-tmpseqs = ape::read.FASTA(fasta_fn, type="AA")
-numseqs = length(tmpseqs)
-numseqs
-```
 # Running Chimera to get 3D structure of all amino acids from alphafold using Chimera
 
 Alphafold returns cif file for each proteins Returns 3 files - \_alphafold.cif, \_alphafold.html, \_alphafold_table.html and txt file (defined in 'outdfs_fn')
 ```{r}
-setwd("~/Library/CloudStorage/OneDrive-Personal/PG Materials/Semester3/FliF/Data/Homologs_pre_analysis")
+setwd("Data/05_3di_analysis_Jackhmmer")
+fasta_fn = "homolog_sequences_renamed.fasta" ## using the manual Jackhmmer hits  - long branches removed 
+tmpseqs = ape::read.FASTA(fasta_fn, type="AA")
+numseqs = length(tmpseqs)
+lines_list <- as.list(readLines("completed_ids.txt"))
+lines_list <- lines_list[lines_list != ""]
 outdfs = NULL; i=1
-
-exclude_is = c()
+exclude_is = lines_list
 for (i in 1:numseqs)
 	{
 	txt = paste0("Getting alphafold structure for sequence #", i, "/", numseqs)
@@ -68,6 +64,9 @@ for (i in 1:numseqs)
 	
 	outdfs_fn = "alphafolds.txt"
 	write.table(x=outdfs, file=outdfs_fn, quote=FALSE, sep="\t", row.names=FALSE, col.names=TRUE)
+	completed_id = names(tmpseqs[i])
+	write(completed_id, file = "completed_ids.txt", append = TRUE, sep = "\n")
+	
 	} # END for (i in 1:numseqs)
 ```
 
